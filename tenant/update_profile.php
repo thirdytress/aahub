@@ -14,21 +14,34 @@ $tenant_id = $_SESSION['user_id'];
 $tenant = $db->getTenantProfile($tenant_id);
 $message = "";
 
+// Define variables for the form
+$firstname = $tenant['firstname'];
+$lastname  = $tenant['lastname'];
+$username  = $tenant['username'];
+$email     = $tenant['email'];
+$phone     = $tenant['phone'];
+
 // 📝 Handle update form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $firstname = $_POST['firstname'] ?? '';
-    $lastname = $_POST['lastname'] ?? '';
-    $username = $_POST['username'] ?? '';
-    $email = $_POST['email'] ?? '';
-    $phone = $_POST['phone'] ?? '';
-    $password = $_POST['password'] ?? '';
-    $confirm = $_POST['confirm_password'] ?? '';
+    $lastname  = $_POST['lastname'] ?? '';
+    $username  = $tenant['username']; // keep read-only
+    $email     = $_POST['email'] ?? '';
+    $phone     = $_POST['phone'] ?? '';
+    $password  = $_POST['password'] ?? '';
 
-    $result = $db->updateTenantProfile($tenant_id, $firstname, $lastname, $username, $email, $phone, $password, $confirm);
+    $result = $db->updateTenantProfile($tenant_id, $firstname, $lastname, $username, $email, $phone, $password);
 
     if ($result === true) {
         $message = "✅ Profile updated successfully!";
         $tenant = $db->getTenantProfile($tenant_id); // refresh data
+
+        // Update form variables after refresh
+        $firstname = $tenant['firstname'];
+        $lastname  = $tenant['lastname'];
+        $username  = $tenant['username'];
+        $email     = $tenant['email'];
+        $phone     = $tenant['phone'];
     } else {
         $message = "⚠️ " . $result;
     }
@@ -326,7 +339,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <a class="navbar-brand fw-bold text-primary" href="#">ApartmentHub Tenant</a>
     <div class="d-flex">
       <a href="dashboard.php" class="btn btn-outline-secondary btn-sm me-2"><i class="bi bi-arrow-left"></i> Back</a>
-      
     </div>
   </div>
 </nav>
@@ -335,27 +347,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <div class="col-md-8 mx-auto">
     <div class="card p-4">
       <h3 class="text-primary mb-3"><i class="bi bi-person-circle me-2"></i>Update Profile</h3>
-      <p class="text-muted mb-4">You can update your email, phone number, or password here.</p>
+
+      <?php if (!empty($message)): ?>
+        <div class="alert alert-info"><?= htmlspecialchars($message) ?></div>
+      <?php endif; ?>
 
       <form method="POST" action="update_profile.php">
         <div class="mb-3">
-          <label class="form-label">Full Name</label>
-          <input type="text" class="form-control" value="<?= $fullname ?>" readonly>
+          <label class="form-label">First Name</label>
+          <input type="text" name="firstname" class="form-control" value="<?= htmlspecialchars($firstname) ?>" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Last Name</label>
+          <input type="text" name="lastname" class="form-control" value="<?= htmlspecialchars($lastname) ?>" required>
         </div>
 
         <div class="mb-3">
           <label class="form-label">Username</label>
-          <input type="text" class="form-control" value="<?= $username ?>" readonly>
+          <input type="text" class="form-control" value="<?= htmlspecialchars($username) ?>" readonly>
         </div>
 
         <div class="mb-3">
           <label class="form-label">Email</label>
-          <input type="email" name="email" class="form-control" value="<?= $email ?>" required>
+          <input type="email" name="email" class="form-control" value="<?= htmlspecialchars($email) ?>" required>
         </div>
 
         <div class="mb-3">
           <label class="form-label">Phone</label>
-          <input type="text" name="phone" class="form-control" value="<?= $phone ?>" required>
+          <input type="text" name="phone" class="form-control" value="<?= htmlspecialchars($phone) ?>">
         </div>
 
         <div class="mb-3">

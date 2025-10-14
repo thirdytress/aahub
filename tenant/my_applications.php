@@ -328,37 +328,39 @@ $applications = $db->getTenantApplications($_SESSION['user_id']);
 
     <!-- Sample Data -->
     <div class="table-responsive">
-      <table class="table table-hover align-middle">
-        < class="table-light">
+  <table class="table table-hover align-middle">
+    <thead class="table-light">
+      <tr>
+        <th>#</th>
+        <th>Apartment</th>
+        <th>Status</th>
+        <th>Date Applied</th>
+      </tr>
+    </thead>
+    <tbody>
+      <?php if (!empty($applications)): ?>
+        <?php foreach ($applications as $index => $app): ?>
           <tr>
-            <th>#</th>
-            <th>Apartment</th>
-            <th>Status</th>
-            <th>Date Applied</th>
+            <td><?= $index + 1 ?></td>
+            <td><?= htmlspecialchars($app['apartment_name']) ?></td>
+            <td>
+              <?php 
+                $status = strtolower($app['status']);
+                echo '<span class="status ' . $status . '">' . ucfirst($status) . '</span>'; 
+              ?>
+            </td>
+            <td><?= htmlspecialchars($app['date_applied']) ?></td>
           </tr>
-        </  thead>
-        <tbody>
-          <tr>
-            <td>1</td>
-            <td>Modern City Loft</td>
-            <td><span class="status pending">Pending</span></td>
-            <td>2024-01-15</td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>Riverside Studio</td>
-            <td><span class="status approved">Approved</span></td>
-            <td>2024-01-10</td>
-          </tr>
-          <tr>
-            <td>3</td>
-            <td>Executive Penthouse</td>
-            <td><span class="status rejected">Rejected</span></td>
-            <td>2024-01-05</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+        <?php endforeach; ?>
+      <?php else: ?>
+        <tr>
+          <td colspan="4" class="text-muted text-center">You haven't submitted any applications yet.</td>
+        </tr>
+      <?php endif; ?>
+    </tbody>
+  </table>
+</div>
+
 
     <!-- Uncomment this for empty state -->
     <!-- <p class="text-muted">You haven't submitted any applications yet.</p> -->

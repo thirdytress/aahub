@@ -199,14 +199,15 @@ $leases = $db->getTenantLeases($tenant_id);
     }
 
     .table thead th {
-      color: white;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      padding: 1.2rem 1rem;
-      border: none;
-      font-size: 0.9rem;
-    }
+    color: var(--earth-brown); /* instead of white */
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 1.2rem 1rem;
+    border: none;
+    font-size: 0.9rem;
+}
+
 
     .table tbody tr {
       transition: all 0.3s ease;
@@ -322,11 +323,12 @@ $leases = $db->getTenantLeases($tenant_id);
             <?php foreach ($leases as $index => $lease): ?>
               <tr>
                 <td><?= $index + 1 ?></td>
-                <td><?= htmlspecialchars($lease['ApartmentName']) ?></td>
-                <td><?= htmlspecialchars($lease['Location']) ?></td>
-                <td>₱<?= number_format($lease['MonthlyRate'], 2) ?></td>
-                <td><?= date('M d, Y', strtotime($lease['StartDate'])) ?></td>
-                <td><?= date('M d, Y', strtotime($lease['EndDate'])) ?></td>
+                <td><?= htmlspecialchars($lease['apartment_name']) ?></td>
+<td><?= htmlspecialchars($lease['Location']) ?></td>
+<td>₱<?= number_format($lease['MonthlyRate'], 2) ?></td>
+<td><?= date('M d, Y', strtotime($lease['start_date'])) ?></td>
+<td><?= date('M d, Y', strtotime($lease['end_date'])) ?></td>
+
               </tr>
             <?php endforeach; ?>
           </tbody>

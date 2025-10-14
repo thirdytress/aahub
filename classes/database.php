@@ -280,18 +280,19 @@ class Database {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getTenantLeases($tenant_id) {
-        $stmt = $this->connect()->prepare("
-            SELECT l.*, p.Name as apartment_name, p.Location, p.MonthlyRate
-            FROM leases l
-            JOIN apartments p ON l.apartment_id = p.ApartmentID
-            WHERE l.tenant_id=:tid
-            ORDER BY l.start_date DESC
-        ");
-        $stmt->bindParam(':tid', $tenant_id);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+   public function getTenantLeases($tenant_id) {
+    $stmt = $this->connect()->prepare("
+        SELECT l.*, p.Name as apartment_name, p.Location, p.MonthlyRate
+        FROM leases l
+        JOIN apartments p ON l.apartment_id = p.ApartmentID
+        WHERE l.tenant_id=:tid
+        ORDER BY l.start_date DESC
+    ");
+    $stmt->bindParam(':tid', $tenant_id);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 
     public function createLease($tenant_id, $apartment_id, $duration_months = 12) {
         $start_date = date('Y-m-d');
@@ -359,6 +360,23 @@ public function registerTenant($firstname, $lastname, $username, $email, $phone,
 
     return $stmt->execute() ? true : "Failed to register tenant.";
 }
+
+public function getTenantById($id) {
+    $stmt = $this->connect()->prepare("SELECT * FROM tenants WHERE tenant_id = :id LIMIT 1");
+    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+public function getTenantByUsername($usernameOrEmail) {
+    $stmt = $this->connect()->prepare("SELECT * FROM tenants WHERE username = :u OR email = :u LIMIT 1");
+    $stmt->bindParam(':u', $usernameOrEmail);
+    $stmt->execute();
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+
+
 
 
 public function logout() {

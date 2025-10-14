@@ -482,6 +482,7 @@ $apartments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <!-- APARTMENTS -->
 <section class="container mt-5">
   <h2 class="mb-4 text-primary">Available Apartments</h2>
+  <div id="message-area"></div>
   <div class="row">
     <?php if ($apartments): ?>
       <?php foreach ($apartments as $apt): ?>
@@ -494,7 +495,15 @@ $apartments = $stmt->fetchAll(PDO::FETCH_ASSOC);
               <h5 class="card-title"><?= htmlspecialchars($apt['Name']) ?></h5>
               <p class="card-text"><?= htmlspecialchars($apt['Description']) ?></p>
               <p class="card-text"><strong>Monthly Rate:</strong> $<?= number_format($apt['MonthlyRate'],2) ?></p>
-              <a href="apply_apartment.php?apartment_id=<?= $apt['ApartmentID']; ?>" class="btn btn-success btn-sm">Apply Now</a>
+
+              <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'tenant'): ?>
+                <!-- Logged-in tenant: AJAX Apply -->
+                <button class="btn btn-success btn-sm mt-auto apply-btn" data-apartment="<?= $apt['ApartmentID']; ?>">Apply Now</button>
+              <?php else: ?>
+                <!-- Not logged-in: trigger login modal -->
+                <button class="btn btn-success btn-sm mt-auto" data-bs-toggle="modal" data-bs-target="#loginModal">Apply Now</button>
+              <?php endif; ?>
+
             </div>
           </div>
         </div>
@@ -504,6 +513,32 @@ $apartments = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <?php endif; ?>
   </div>
 </section>
+
+<?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'tenant'): ?>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function(){
+    $('.apply-btn').click(function(){
+        var btn = $(this);
+        var apartmentID = btn.data('apartment');
+
+        $.ajax({
+            url: 'apply_ajax.php',
+            method: 'POST',
+            data: { apartment_id: apartmentID },
+            success: function(response){
+                $('#message-area').html('<div class="alert alert-info">'+response+'</div>');
+                btn.text('Applied');
+            },
+            error: function(){
+                $('#message-area').html('<div class="alert alert-danger">Something went wrong. Try again.</div>');
+            }
+        });
+    });
+});
+</script>
+<?php endif; ?>
+
 
 <!-- LOGIN MODAL -->
 <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
@@ -515,19 +550,13 @@ $apartments = $stmt->fetchAll(PDO::FETCH_ASSOC);
       </div>
       <div class="modal-body">
         <form action="actions/login.php" method="POST">
-          <label class="form-label">Select Role</label>
-          <select class="form-select mb-3" name="role" required>
-            <option value="tenant" selected>Tenant</option>
-            <option value="admin">Admin</option>
-          </select>
-
           <div class="mb-3">
-            <label>Username or Email</label>
+            <label class="form-label">Username or Email</label>
             <input type="text" class="form-control" name="username" required>
           </div>
 
           <div class="mb-3">
-            <label>Password</label>
+            <label class="form-label">Password</label>
             <input type="password" class="form-control" name="password" required>
           </div>
 
