@@ -1,7 +1,7 @@
 <?php
-require_once "classes/database.php";
-$db = new Database();
-$db->logout();
+session_start();
+session_unset();
+session_destroy();
 header("Location: index.php"); // redirect sa login page
 exit();
 ?>
