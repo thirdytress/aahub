@@ -375,7 +375,167 @@ public function getTenantByUsername($usernameOrEmail) {
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
+ // ➤ Add Utility Bill (Admin)
+    public function addUtility($tenant_id, $type, $amount, $due_date, $status = 'Unpaid') {
+        $stmt = $this->connect()->prepare("
+            INSERT INTO utilities (tenant_id, type, amount, due_date, status)
+            VALUES (:tenant_id, :type, :amount, :due_date, :status)
+        ");
+        $stmt->bindParam(':tenant_id', $tenant_id);
+        $stmt->bindParam(':type', $type);
+        $stmt->bindParam(':amount', $amount);
+        $stmt->bindParam(':due_date', $due_date);
+        $stmt->bindParam(':status', $status);
+        return $stmt->execute();
+    }
 
+    // ➤ Get all utilities (Admin)
+    public function getAllUtilities() {
+        $stmt = $this->connect()->prepare("
+            SELECT u.*, t.firstname, t.lastname, t.username
+            FROM utilities u
+            JOIN tenants t ON u.tenant_id = t.tenant_id
+            ORDER BY u.due_date DESC
+        ");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // ➤ Get utilities by tenant (Tenant)
+    public function getTenantUtilities($tenant_id) {
+        $stmt = $this->connect()->prepare("
+            SELECT * FROM utilities 
+            WHERE tenant_id = :tid 
+            ORDER BY due_date DESC
+        ");
+        $stmt->bindParam(':tid', $tenant_id);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // ➤ Update Utility Status (Admin)
+    public function updateUtilityStatus($id, $status) {
+        $stmt = $this->connect()->prepare("
+            UPDATE utilities 
+            SET status = :status 
+            WHERE id = :id
+        ");
+        $stmt->bindParam(':status', $status);
+        $stmt->bindParam(':id', $id);
+        return $stmt->execute();
+    }
+
+    // ➤ Delete a Utility (optional)
+    public function deleteUtility($id) {
+        $stmt = $this->connect()->prepare("DELETE FROM utilities WHERE id = :id");
+        $stmt->bindParam(':id', $id);
+        return $stmt->execute();
+    }
+
+    public function countUtilities() {
+    $stmt = $this->connect()->query("SELECT COUNT(*) AS total FROM utilities");
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $row['total'] ?? 0;
+}
+
+// ---------- PAYMENTS ----------
+public function addPayment($tenant_id, $amount, $payment_type = 'Rent') {
+    $stmt = $this->connect()->prepare("
+        INSERT INTO payments (tenant_id, amount, payment_type)
+        VALUES (?, ?, ?)
+    ");
+    return $stmt->execute([$tenant_id, $amount, $payment_type]);
+}
+
+public function getPaymentsByTenant($tenant_id) {
+    $stmt = $this->connect()->prepare("
+        SELECT * FROM payments WHERE tenant_id = ? ORDER BY payment_date DESC
+    ");
+    $stmt->execute([$tenant_id]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+
+public function updatePaymentStatus($id, $status) {
+    $stmt = $this->connect()->prepare("UPDATE payments SET status = ? WHERE id = ?");
+    return $stmt->execute([$status, $id]);
+}
+
+// Automatically generate next month’s billing
+public function generateMonthlyPayments() {
+    $stmt = $this->connect()->prepare("
+        SELECT l.lease_id, l.tenant_id, p.MonthlyRate
+        FROM leases l
+        JOIN apartments p ON l.apartment_id = p.ApartmentID
+        WHERE CURDATE() BETWEEN l.start_date AND l.end_date
+    ");
+    $stmt->execute();
+    $leases = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($leases as $lease) {
+        $lease_id = $lease['lease_id'];
+        $tenant_id = $lease['tenant_id'];
+        $amount = $lease['MonthlyRate'];
+        $due_date = date('Y-m-t'); // end of current month
+
+        // Check if already generated this month
+        $check = $this->connect()->prepare("
+            SELECT * FROM payments 
+            WHERE lease_id = :lid AND MONTH(due_date) = MONTH(CURDATE()) AND YEAR(due_date) = YEAR(CURDATE())
+        ");
+        $check->bindParam(':lid', $lease_id);
+        $check->execute();
+        if (!$check->fetch()) {
+            $insert = $this->connect()->prepare("
+                INSERT INTO payments (tenant_id, lease_id, amount, due_date, status)
+                VALUES (:tid, :lid, :amt, :due, 'Unpaid')
+            ");
+            $insert->bindParam(':tid', $tenant_id);
+            $insert->bindParam(':lid', $lease_id);
+            $insert->bindParam(':amt', $amount);
+            $insert->bindParam(':due', $due_date);
+            $insert->execute();
+        }
+    }
+}
+
+// Get all payments for admin view
+public function getAllPayments() {
+    $stmt = $this->connect()->prepare("
+        SELECT p.*, t.firstname, t.lastname
+        FROM payments p
+        JOIN tenants t ON p.tenant_id = t.tenant_id
+        ORDER BY p.due_date DESC
+    ");
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Get tenant payments
+public function getTenantPayments($tenant_id) {
+    $stmt = $this->connect()->prepare("
+        SELECT p.*, a.Name as apartment_name
+        FROM payments p
+        JOIN leases l ON p.lease_id = l.lease_id
+        JOIN apartments a ON l.apartment_id = a.ApartmentID
+        WHERE p.tenant_id = :tid
+        ORDER BY p.due_date DESC
+    ");
+    $stmt->bindParam(':tid', $tenant_id);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Mark payment as paid
+public function markPaymentPaid($payment_id) {
+    $stmt = $this->connect()->prepare("
+        UPDATE payments 
+        SET status = 'Paid', date_paid = NOW() 
+        WHERE payment_id = :pid
+    ");
+    $stmt->bindParam(':pid', $payment_id);
+    return $stmt->execute();
+}
 
 
 

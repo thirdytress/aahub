@@ -27,6 +27,7 @@ $totalTenants = $db->countTenants();
 $totalApplications = $db->countApplications();
 $totalApartments = $db->countApartments();
 $totalLeases = $db->countLeases();
+$totalUtilities = $db->countUtilities();
 ?>
 
 <!DOCTYPE html>
@@ -79,7 +80,7 @@ $totalLeases = $db->countLeases();
   <div class="card p-4 shadow-sm">
     <h3 class="text-primary">Welcome, <?= htmlspecialchars($fullname ?: 'Admin'); ?>!</h3>
     <hr>
-    <p>This is your admin dashboard. You can manage tenants, applications, apartments, and maintenance requests here.</p>
+    <p>This is your admin dashboard. You can manage tenants, applications, apartments, utilities, and maintenance requests here.</p>
 
     <!-- DASHBOARD CARDS -->
     <div class="row mt-4">
@@ -120,6 +121,27 @@ $totalLeases = $db->countLeases();
           <h5>View Leases</h5>
           <p class="small text-muted"><?= $totalLeases ?> active leases</p>
           <a href="view_leases.php" class="btn btn-info btn-sm mt-auto">Go</a>
+        </div>
+      </div>
+
+      <!-- Manage Payments -->
+<div class="col-md-3 mb-3">
+  <div class="card text-center h-100 p-3 shadow-sm dashboard-card">
+    <div class="mb-2"><i class="bi bi-cash-coin icon"></i></div>
+    <h5>Manage Payments</h5>
+    <p class="small text-muted">View and update payment records</p>
+    <a href="manage_payments.php" class="btn btn-success btn-sm mt-auto">Go</a>
+  </div>
+</div>
+
+
+      <!-- Utilities Management -->
+      <div class="col-md-3 mb-3">
+        <div class="card text-center h-100 p-3 shadow-sm dashboard-card">
+          <div class="mb-2"><i class="bi bi-droplet-half icon text-primary"></i></div>
+          <h5>Utilities</h5>
+          <p class="small text-muted"><?= $totalUtilities ?> bills</p>
+          <a href="manage_utilities.php" class="btn btn-secondary btn-sm mt-auto">Manage</a>
         </div>
       </div>
 

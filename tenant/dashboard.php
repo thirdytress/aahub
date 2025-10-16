@@ -173,6 +173,43 @@ $fullname = $tenant['firstname'] . ' ' . $tenant['lastname'];
             </div>
         </div>
 
+        <!-- View Utilities -->
+<div class="col-md-6 col-lg-3">
+  <div class="card h-100">
+    <div class="card-body">
+      <div class="icon-container text-info"><i class="bi bi-lightning-charge"></i></div>
+      <h5 class="card-title">My Utilities</h5>
+      <p class="card-text">View your water and electricity bills</p>
+      <a href="utilities.php" class="btn btn-info btn-card w-100">View Bills</a>
+    </div>
+  </div>
+</div>
+
+<!-- Pay Rent -->
+<div class="col-md-6 col-lg-3">
+  <div class="card h-100">
+    <div class="card-body">
+      <div class="icon-container text-success"><i class="bi bi-cash-stack"></i></div>
+      <h5 class="card-title">Pay Rent</h5>
+      <p class="card-text">Submit your rent payment</p>
+      <a href="pay_rent.php" class="btn btn-success w-100">Pay Now</a>
+    </div>
+  </div>
+</div>
+
+<!-- View Payment History -->
+<div class="col-md-6 col-lg-3">
+  <div class="card h-100">
+    <div class="card-body">
+      <div class="icon-container text-primary"><i class="bi bi-credit-card"></i></div>
+      <h5 class="card-title">Payment History</h5>
+      <p class="card-text">View your past payments</p>
+      <a href="view_payments.php" class="btn btn-primary w-100">View</a>
+    </div>
+  </div>
+</div>
+
+
         <!-- Update Profile -->
         <div class="col-md-6 col-lg-3">
             <div class="card h-100">
